@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vice Cover Studio — GTA-style poster maker</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">VC</span>
+    <div>
+      <h1>VICE COVER STUDIO</h1>
+      <p>Turn any photo into a neon-sunset poster &mdash; offline, in your browser.</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button id="undoBtn" type="button" title="Undo (Ctrl+Z)">&#8617; Undo</button>
+    <button id="redoBtn" type="button" title="Redo (Ctrl+Shift+Z)">&#8618; Redo</button>
+  </div>
+</header>
+
+<main class="studio">
+  <aside class="panel controls" aria-label="Cover controls">
+    <section class="group">
+      <h2>1 &middot; Photos</h2>
+      <div id="dropzone" class="dropzone" tabindex="0">
+        <strong>Drop photos here</strong>
+        <span>or</span>
+        <label class="file-btn">Choose photos
+          <input id="photoInput" type="file" accept="image/*" multiple hidden>
+        </label>
+        <small>1&ndash;4 photos, kept on your machine. Two samples are loaded already.</small>
+      </div>
+      <div id="photoStrip" class="photo-strip" aria-label="Loaded photos"></div>
+      <p class="hint">Click a photo, then click a panel in the preview to put it there.
+        Drag inside a panel to move the photo; use Zoom below to crop tighter.</p>
+    </section>
+
+    <section class="group">
+      <h2>2 &middot; Layout</h2>
+      <div id="layoutRow" class="chip-row" role="group" aria-label="Layout"></div>
+    </section>
+
+    <section class="group">
+      <h2>3 &middot; Colour grade</h2>
+      <div id="gradeRow" class="chip-row" role="group" aria-label="Colour grade"></div>
+    </section>
+
+    <section class="group">
+      <h2>4 &middot; Caption</h2>
+      <label class="field">Big title
+        <input id="titleInput" type="text" maxlength="24" value="VICE HEIST" autocomplete="off">
+      </label>
+      <label class="field">Neon script line
+        <input id="subtitleInput" type="text" maxlength="40" value="neon coast nights" autocomplete="off">
+      </label>
+      <label class="field">Badge ribbon
+        <input id="ribbonInput" type="text" maxlength="18" value="COVER STAR" autocomplete="off">
+      </label>
+      <label class="field">Heat &mdash; <span id="heatValue">4</span> / 5 stars
+        <input id="heatInput" type="range" min="1" max="5" step="1" value="4">
+      </label>
+    </section>
+
+    <section class="group">
+      <h2>5 &middot; Selected panel</h2>
+      <p class="hint" id="panelHint">No panel selected &mdash; click a panel in the preview.</p>
+      <label class="field">Zoom
+        <input id="zoomInput" type="range" min="1" max="3" step="0.05" value="1">
+      </label>
+      <div class="row-btns">
+        <button id="fitBtn" type="button">Fit photo</button>
+        <button id="swapBtn" type="button">Next photo</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <h2>6 &middot; Finish</h2>
+      <label class="check"><input id="grainInput" type="checkbox" checked> Film grain</label>
+      <label class="check"><input id="vignetteInput" type="checkbox" checked> Vignette</label>
+      <label class="check"><input id="palmInput" type="checkbox" checked> Palm silhouettes</label>
+      <div class="export-grid" role="group" aria-label="Export size">
+        <button class="export-btn" type="button" data-size="1080x1080">PNG 1080 &times; 1080</button>
+        <button class="export-btn" type="button" data-size="1080x1350">PNG 1080 &times; 1350</button>
+        <button class="export-btn" type="button" data-size="1920x1080">PNG 1920 &times; 1080</button>
+        <button class="export-btn" type="button" data-size="1080x1920">PNG 1080 &times; 1920</button>
+      </div>
+      <p id="status" role="status" aria-live="polite"></p>
+    </section>
+  </aside>
+
+  <section class="preview-wrap" aria-label="Live preview">
+    <div class="preview-head">
+      <span id="previewLabel">Live preview &mdash; hero &middot; sunset</span>
+      <span id="previewSize">1080 &times; 1080</span>
+    </div>
+    <canvas id="stage" width="720" height="720" aria-label="Cover preview"></canvas>
+    <p class="hint center">Drag a panel to reposition its photo. The exported PNG renders at full size.</p>
+  </section>
+</main>
+
+<footer class="foot">
+  <span>All art is drawn on this page &mdash; no uploads, no network, no Rockstar artwork.</span>
+  <span>Fonts: Anton &amp; Pacifico (SIL Open Font License, see app/fonts/).</span>
+</footer>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
