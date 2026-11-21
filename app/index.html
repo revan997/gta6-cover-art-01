@@ -3,110 +3,95 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vice Cover Studio — GTA-style poster maker</title>
+<title>Vice Cover Studio — GTA-style cover art maker</title>
+<meta name="description" content="Turn any photo and a caption into GTA 6-style multi-panel cover art, offline in your browser. Export a PNG to share.">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="src/main.js"></script>
+<script type="module" src="src/shots.js"></script>
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">
-    <span class="brand-mark">VC</span>
-    <div>
-      <h1>VICE COVER STUDIO</h1>
-      <p>Turn any photo into a neon-sunset poster &mdash; offline, in your browser.</p>
-    </div>
-  </div>
-  <div class="top-actions">
-    <button id="undoBtn" type="button" title="Undo (Ctrl+Z)">&#8617; Undo</button>
-    <button id="redoBtn" type="button" title="Redo (Ctrl+Shift+Z)">&#8618; Redo</button>
-  </div>
+<header class="app-header">
+  <div class="brand"><span class="brand-mark">★</span> VICE COVER STUDIO</div>
+  <div class="brand-sub">GTA-style cover art maker · 100% offline · your photos never leave this machine</div>
 </header>
 
-<main class="studio">
-  <aside class="panel controls" aria-label="Cover controls">
-    <section class="group">
-      <h2>1 &middot; Photos</h2>
-      <div id="dropzone" class="dropzone" tabindex="0">
-        <strong>Drop photos here</strong>
-        <span>or</span>
-        <label class="file-btn">Choose photos
-          <input id="photoInput" type="file" accept="image/*" multiple hidden>
-        </label>
-        <small>1&ndash;4 photos, kept on your machine. Two samples are loaded already.</small>
+<main class="app">
+  <aside class="controls">
+    <section class="card" id="dropZone">
+      <h2>1 · Photos</h2>
+      <p class="hint">Drop photos here, or pick a file. Click a panel in the preview, then a photo below to put it there.</p>
+      <label class="upload-btn" for="uploadInput">＋ Add your photos</label>
+      <input id="uploadInput" type="file" accept="image/*" multiple hidden>
+      <div id="sampleChips" class="chips"></div>
+    </section>
+
+    <section class="card">
+      <h2>2 · Layout</h2>
+      <div id="layoutBtns" class="btn-row"></div>
+    </section>
+
+    <section class="card">
+      <h2>3 · Grade</h2>
+      <div id="gradeBtns" class="btn-row"></div>
+    </section>
+
+    <section class="card">
+      <h2>4 · Words</h2>
+      <label class="field">Title
+        <input id="titleInput" type="text" maxlength="24" value="VICE HEIST">
+      </label>
+      <label class="field">Subtitle
+        <input id="subtitleInput" type="text" maxlength="40" value="neon coast nights">
+      </label>
+      <label class="field">Ribbon
+        <input id="ribbonInput" type="text" maxlength="14" value="COVER STAR">
+      </label>
+      <label class="field">Heat
+        <select id="heatInput">
+          <option value="0">☆☆☆☆☆</option>
+          <option value="1">★☆☆☆☆</option>
+          <option value="2">★★☆☆☆</option>
+          <option value="3">★★★☆☆</option>
+          <option value="4">★★★★☆</option>
+          <option value="5" selected>★★★★★</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>5 · Finish</h2>
+      <div class="check-row">
+        <label><input id="grainCheck" type="checkbox" checked> Film grain</label>
+        <label><input id="vignetteCheck" type="checkbox" checked> Vignette</label>
       </div>
-      <div id="photoStrip" class="photo-strip" aria-label="Loaded photos"></div>
-      <p class="hint">Click a photo, then click a panel in the preview to put it there.
-        Drag inside a panel to move the photo; use Zoom below to crop tighter.</p>
-    </section>
-
-    <section class="group">
-      <h2>2 &middot; Layout</h2>
-      <div id="layoutRow" class="chip-row" role="group" aria-label="Layout"></div>
-    </section>
-
-    <section class="group">
-      <h2>3 &middot; Colour grade</h2>
-      <div id="gradeRow" class="chip-row" role="group" aria-label="Colour grade"></div>
-    </section>
-
-    <section class="group">
-      <h2>4 &middot; Caption</h2>
-      <label class="field">Big title
-        <input id="titleInput" type="text" maxlength="24" value="VICE HEIST" autocomplete="off">
-      </label>
-      <label class="field">Neon script line
-        <input id="subtitleInput" type="text" maxlength="40" value="neon coast nights" autocomplete="off">
-      </label>
-      <label class="field">Badge ribbon
-        <input id="ribbonInput" type="text" maxlength="18" value="COVER STAR" autocomplete="off">
-      </label>
-      <label class="field">Heat &mdash; <span id="heatValue">4</span> / 5 stars
-        <input id="heatInput" type="range" min="1" max="5" step="1" value="4">
-      </label>
-    </section>
-
-    <section class="group">
-      <h2>5 &middot; Selected panel</h2>
-      <p class="hint" id="panelHint">No panel selected &mdash; click a panel in the preview.</p>
-      <label class="field">Zoom
-        <input id="zoomInput" type="range" min="1" max="3" step="0.05" value="1">
-      </label>
-      <div class="row-btns">
-        <button id="fitBtn" type="button">Fit photo</button>
-        <button id="swapBtn" type="button">Next photo</button>
+      <div class="btn-row">
+        <button id="undoBtn" type="button" class="ghost">↩ Undo</button>
+        <button id="redoBtn" type="button" class="ghost">↪ Redo</button>
       </div>
-    </section>
-
-    <section class="group">
-      <h2>6 &middot; Finish</h2>
-      <label class="check"><input id="grainInput" type="checkbox" checked> Film grain</label>
-      <label class="check"><input id="vignetteInput" type="checkbox" checked> Vignette</label>
-      <label class="check"><input id="palmInput" type="checkbox" checked> Palm silhouettes</label>
-      <div class="export-grid" role="group" aria-label="Export size">
-        <button class="export-btn" type="button" data-size="1080x1080">PNG 1080 &times; 1080</button>
-        <button class="export-btn" type="button" data-size="1080x1350">PNG 1080 &times; 1350</button>
-        <button class="export-btn" type="button" data-size="1920x1080">PNG 1920 &times; 1080</button>
-        <button class="export-btn" type="button" data-size="1080x1920">PNG 1080 &times; 1920</button>
+      <button id="makeCoverBtn" type="button" class="mega">★ Make my cover</button>
+      <div class="export-list">
+        <button type="button" class="export-btn" data-size="1080x1080">Export PNG 1080x1080</button>
+        <button type="button" class="export-btn" data-size="1080x1350">Export PNG 1080x1350</button>
+        <button type="button" class="export-btn" data-size="1920x1080">Export PNG 1920x1080</button>
+        <button type="button" class="export-btn" data-size="1080x1920">Export PNG 1080x1920</button>
       </div>
-      <p id="status" role="status" aria-live="polite"></p>
+      <div id="sizeBtns" class="btn-row"></div>
+      <p class="hint">Preview size follows the export size. Drag a panel to pan its photo, scroll over it to zoom.</p>
     </section>
   </aside>
 
-  <section class="preview-wrap" aria-label="Live preview">
-    <div class="preview-head">
-      <span id="previewLabel">Live preview &mdash; hero &middot; sunset</span>
-      <span id="previewSize">1080 &times; 1080</span>
-    </div>
-    <canvas id="stage" width="720" height="720" aria-label="Cover preview"></canvas>
-    <p class="hint center">Drag a panel to reposition its photo. The exported PNG renders at full size.</p>
+  <section class="stage">
+    <canvas id="preview" width="980" height="551"></canvas>
+    <div id="slotBox" aria-hidden="true"></div>
+    <p class="stage-hint">Live preview — click a panel to select it · drag to pan · scroll to zoom · one click on “Make my cover” and you are done.</p>
   </section>
 </main>
 
-<footer class="foot">
-  <span>All art is drawn on this page &mdash; no uploads, no network, no Rockstar artwork.</span>
-  <span>Fonts: Anton &amp; Pacifico (SIL Open Font License, see app/fonts/).</span>
-</footer>
+<canvas id="shotCanvas" style="display:none"></canvas>
 
-<script type="module" src="./src/main.js"></script>
+<footer class="app-footer">
+  Runs fully offline — no uploads, no accounts, no network requests. Lettering: Anton + Pacifico (SIL Open Font License 1.1). All cover art is drawn by this app; no Rockstar logos, artwork or fonts.
+</footer>
 </body>
 </html>

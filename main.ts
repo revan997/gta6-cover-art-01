@@ -1,43 +1,40 @@
-// Vice Cover Studio — the program that hands the entry in (Node 22, standard
-// library only). The web app itself is plain static files under app/ — an
-// offline GTA-style cover maker that draws everything on a canvas — and this
-// file just gathers it: it copies app/ and screenshots/ from beside this file
-// into the output directory and writes /output/dossier.json, the summary the
-// judge reads, using the vendored make.fun library. It runs twice in grading
-// and both runs must write identical bytes, so there is no timestamp, no
-// randomness and no network anywhere in here.
+// Vice Cover Studio v2 — entry program for gta6-cover-art-01 (Node 22,
+// standard library only). The app is this directory's app/ folder: plain
+// static files a desktop browser loads offline (app/index.html and its ES
+// modules, vendored OFL fonts, bundled sample photos, zero network
+// requests). The program hands the entry in: it copies app/ and
+// screenshots/ from beside this file into the output directory and writes
+// /output/dossier.json with the vendored make.fun library, so the judge can
+// read the app's source outline and the screenshots. Outside the grader's
+// container, MAKEFUN_OUTPUT_DIR stands in for /output, default /output.
+// The program writes nowhere else — never to the repository, never to /bot
+// (read-only in the grader) — and runs twice byte-identical: no timestamps,
+// no randomness, no network.
 //
-// Try it locally with:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
-// and serve the app itself with `node serve.ts` (http://localhost:8080).
+// Serve the app locally with `node serve.ts`, then open http://localhost:8080.
+// Build the entry with:  mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
 import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
 
-// The repository root is the directory holding this file; the output directory
-// is /output in the grader, or MAKEFUN_OUTPUT_DIR when set for a local run.
-const repoRoot = fileURLToPath(new URL('.', import.meta.url));
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const here = fileURLToPath(new URL('.', import.meta.url));
+const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
-function copyTree(from: string, to: string): void {
-  mkdirSync(to, { recursive: true });
-  cpSync(from, to, { recursive: true });
-}
+mkdirSync(out, { recursive: true });
+cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });
+mkdirSync(join(out, 'screenshots'), { recursive: true });
+if (existsSync(join(here, 'screenshots'))) cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
 
-copyTree(join(repoRoot, 'app'), join(outputDir, 'app'));
-if (existsSync(join(repoRoot, 'screenshots'))) {
-  copyTree(join(repoRoot, 'screenshots'), join(outputDir, 'screenshots'));
-}
-
-// The scorer's caps for this competition: the dossier text is capped, at most
-// four screenshots of 256 KiB each, and app/ stays inside 993 files / 48 MiB
-// with no path over 1000 bytes. buildDossier refuses an entry the scorer
-// would refuse, so a bad entry fails here instead of silently passing.
+// The scorer's own caps (reference/gate.json): only text_max_bytes shapes the
+// bytes; the others refuse an entry the scorer would refuse (more than 4
+// screenshots or one over 256 KiB; more than 993 files in app/ or 48 MiB of
+// app files, in all, or a path under app/ over 1000 bytes: app/ counts beside
+// /output's own 1000-entry cap, its screenshots/ and dossier.json).
 writeFileSync(
-  join(outputDir, 'dossier.json'),
-  buildDossier(outputDir, {
+  join(out, 'dossier.json'),
+  buildDossier(out, {
     text_max_bytes: 163840,
     screenshots: { max: 4, max_bytes: 262144 },
     app_max_files: 993,
